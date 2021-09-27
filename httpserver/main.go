@@ -23,7 +23,6 @@ func main() {
 	defer glog.Flush()
 
 	glog.V(2).Info("Starting http server...")
-	http.HandleFunc("/", rootHandler)
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("/", rootHandler)
 	serveMux.HandleFunc("/healthz", healthz)
