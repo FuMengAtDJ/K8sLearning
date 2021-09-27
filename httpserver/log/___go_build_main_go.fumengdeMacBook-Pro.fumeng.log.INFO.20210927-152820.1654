@@ -1,0 +1,9 @@
+Log file created at: 2021/09/27 15:28:20
+Running on machine: fumengdeMacBook-Pro
+Binary: Built with gc go1.15.6 for darwin/amd64
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0927 15:28:20.153764    1654 main.go:25] Starting http server...
+I0927 15:28:39.815484    1654 main.go:56] Client Ip=127.0.0.1
+I0927 15:28:39.815501    1654 main.go:57] Response http statuscode=200
+I0927 15:28:39.881022    1654 main.go:56] Client Ip=127.0.0.1
+I0927 15:28:39.881037    1654 main.go:57] Response http statuscode=200
