@@ -34,6 +34,7 @@ func main() {
 }
 
 func healthz(w http.ResponseWriter, r *http.Request) {
+	glog.V(2).Info("health handler")
 	io.WriteString(w, "200")
 }
 
@@ -42,15 +43,17 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "===================Details of the http request header:============\n")
 	for k, v := range r.Header {
 		io.WriteString(w, fmt.Sprintf("%s=%s\n", k, v))
+		w.Header()[k] = v
 	}
 
-	io.WriteString(w, "===================Details of the OS ENV:VERSION ============\n")
 	version := os.Getenv("VERSION")
 	if version != "" {
 		io.WriteString(w, fmt.Sprintf("VERSION=%s\n", version))
+		w.Header().Set("VERSION", version)
 	}
 
 	w.WriteHeader(http.StatusOK)
+
 	glog.V(2).Info(fmt.Sprintf("Client Ip=%s\n", RemoteIp(r)))
 	glog.V(2).Info(fmt.Sprintf("Response http statuscode=%d\n", http.StatusOK))
 }
