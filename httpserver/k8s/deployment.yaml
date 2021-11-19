@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpserver-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: httpserver
+  template:
+    metadata:
+      labels:
+        app: httpserver
+    spec:
+      containers:
+        - name: httpserver
+          image: httpserver:v1.0
+          resources:
+            limits:
+              memory: 300Mi
+              cpu: 300m
+            requests:
+              memory: 100Mi
+              cpu: 100m
+          volumeMounts:
+          - name: logPath
+            mountPath: /log
+          readinessProbe:
+            httpGet:
+              ### this probe will fail with 404 error code
+              ### only httpcode between 200-400 is retreated as success
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 2
+        imagePullSecrets:
+        - name: regcred
+        volumes:
+        - name: logPath
+          emptyDir: {}
+          emptyDir: {}
