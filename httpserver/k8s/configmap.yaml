@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: httpserver-evn-config
+  labels:
+    app: httpserver
+data:
+  ENV_VERSION: 1.5.15

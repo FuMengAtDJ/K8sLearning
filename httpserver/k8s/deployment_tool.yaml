@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  httpserver-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: httpserver
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: httpserver
+    spec:
+      containers:
+      - name: httpserver
+        image: httpserver:v1.1
+        resources:
+          limits:
+            cpu: "300m"
+            memory: "300Mi"
+          requests:
+            cpu: "150m"
+            memory: "100Mi"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 10
+        env:
+        - name: ENV_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: httpserver-evn-config
+              key: ENV_VERSION
+        volumeMounts:
+        - mountPath: /log
+          name: data
+      volumes:
+      - name: data
+        emptyDir: {}
+      restartPolicy: Always
+      imagePullPolicy: Always
+      imagePullSecrets:
+      - name:  regcred

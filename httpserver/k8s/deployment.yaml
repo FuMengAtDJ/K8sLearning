@@ -30,7 +30,7 @@ spec:
               memory: 100Mi
               cpu: 100m
           volumeMounts:
-          - name: logPath
+          - name: logPathDir
             mountPath: /log
           readinessProbe: # 优雅启动（探活）
             httpGet:
@@ -41,8 +41,8 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 5
             successThreshold: 2
-        imagePullSecrets: ### Pull image from a Private Rigistry Docker Hub
+        imagePullSecrets:
         - name: regcred
         volumes:
-        - name: logPath
+        - name: logPathDir
           emptyDir: {}
