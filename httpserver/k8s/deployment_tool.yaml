@@ -45,7 +45,7 @@ spec:
         - name: ENV_VERSION
           valueFrom:
             configMapKeyRef:
-              name: httpserver-evn-config
+              name: httpserver-env-config
               key: ENV_VERSION
         volumeMounts:
         - mountPath: /log

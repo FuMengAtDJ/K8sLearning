@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: httpserver-evn-config
+  name: httpserver-env-config
   labels:
     app: httpserver
 data:
