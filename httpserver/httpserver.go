@@ -13,8 +13,6 @@ import (
 )
 
 func main() {
-	// 设置环境变量的值
-	os.Setenv("VERSION", "1.15.6")
 	// 设置flag for glog
 	flag.Set("v", "4")
 	flag.Set("alsologtostderr", "true")
@@ -46,7 +44,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header()[k] = v
 	}
 
-	version := os.Getenv("VERSION")
+	version := os.Getenv("ENV_VERSION")
 	if version != "" {
 		io.WriteString(w, fmt.Sprintf("VERSION=%s\n", version))
 		w.Header().Set("VERSION", version)

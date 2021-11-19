@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: httpserver-deployment
 spec:
-  replicas: 3
+  replicas: 3  
   selector:
     matchLabels:
       app: httpserver
@@ -15,7 +15,14 @@ spec:
       containers:
         - name: httpserver
           image: httpserver:v1.0
-          resources:
+          imagePullPolicy: Always
+          env: # 定义环境变量，配置和代码分离
+          - name: ENV_VERSION
+            valueFrom:
+              configMapKeyRef:
+                name: httpserver-evn-config
+                key: ENV_VERSION
+          resources: # 资源请求和Qos保证：Burstable
             limits:
               memory: 300Mi
               cpu: 300m
@@ -25,7 +32,7 @@ spec:
           volumeMounts:
           - name: logPath
             mountPath: /log
-          readinessProbe:
+          readinessProbe: # 优雅启动（探活）
             httpGet:
               ### this probe will fail with 404 error code
               ### only httpcode between 200-400 is retreated as success
@@ -35,8 +42,8 @@ spec:
             periodSeconds: 5
             successThreshold: 2
         imagePullSecrets:
+          ### Pull image from a Private Rigistry Docker Hub
         - name: regcred
         volumes:
         - name: logPath
-          emptyDir: {}
           emptyDir: {}
