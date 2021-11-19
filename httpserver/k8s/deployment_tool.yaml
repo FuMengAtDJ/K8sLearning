@@ -20,6 +20,7 @@ spec:
       containers:
       - name: httpserver
         image: httpserver:v1.1
+        imagePullPolicy: Always
         resources:
           limits:
             cpu: "300m"
@@ -52,7 +53,5 @@ spec:
       volumes:
       - name: data
         emptyDir: {}
-      restartPolicy: Always
-      imagePullPolicy: Always
       imagePullSecrets:
       - name:  regcred
