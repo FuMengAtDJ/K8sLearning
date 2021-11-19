@@ -41,8 +41,7 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 5
             successThreshold: 2
-        imagePullSecrets:
-          ### Pull image from a Private Rigistry Docker Hub
+        imagePullSecrets: ### Pull image from a Private Rigistry Docker Hub
         - name: regcred
         volumes:
         - name: logPath
