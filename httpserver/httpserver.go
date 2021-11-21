@@ -16,7 +16,8 @@ func main() {
 	// 设置flag for glog
 	flag.Set("v", "4")
 	flag.Set("alsologtostderr", "true")
-	flag.Set("log_dir", "./log")
+	// 默认log出力到/var/log/container下面。便于对log进行统一收集。不再单出力到下面的目录
+	// flag.Set("log_dir", "./log")
 	flag.Parse()
 	defer glog.Flush()
 
