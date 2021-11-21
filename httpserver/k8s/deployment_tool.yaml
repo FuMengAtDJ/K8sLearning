@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: httpserver
-        image: docker.io/mengfu521/httpserver:v1.1
+        image: docker.io/mengfu521/httpserver:v1.2
         imagePullPolicy: Always
         resources:
           limits:
