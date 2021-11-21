@@ -9,8 +9,10 @@ spec:
       app: httpserver
   strategy:
     rollingUpdate:
+      ## 超过Pod数
       maxSurge: 1
-      maxUnavailable: 1
+      ## 不足Pod数
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
@@ -29,19 +31,25 @@ spec:
             cpu: "150m"
             memory: "100Mi"
         livenessProbe:
+          ## 探活，当检查失败时，该容器无法正常提供服务，
+          ## kubelet会终止该容器，安好RestartPolicy进行重启
           httpGet:
             path: /healthz
             port: 80
-          initialDelaySeconds: 30
+          initialDelaySeconds: 15
           periodSeconds: 5
+          timeoutSeconds: 1
         readinessProbe:
+          ## 就绪状态检查，当检查失败，意味着应用程序正在运行，但因为某些原因无法提供服务
+          ## Pod壮体啊会被标记为NotReady
           httpGet:
             path: /healthz
             port: 80
-          initialDelaySeconds: 30
+          initialDelaySeconds: 15
           periodSeconds: 5
-          timeoutSeconds: 10
+          timeoutSeconds: 1
         env:
+          ## 代码和配置分离，将需要的环境变量设置到configmap中
         - name: ENV_VERSION
           valueFrom:
             configMapKeyRef:
@@ -54,4 +62,5 @@ spec:
       - name: data
         emptyDir: {}
       imagePullSecrets:
+        ## 由于Docker hub上该容器设置是Public的，所以不设置imagePullSecrets也可以正常PullImage
       - name:  regcred
