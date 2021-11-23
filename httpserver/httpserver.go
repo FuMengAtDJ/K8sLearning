@@ -52,6 +52,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Hello, Welcome to kubernetes."))
 
 	glog.V(2).Info(fmt.Sprintf("Client Ip=%s\n", RemoteIp(r)))
 	glog.V(2).Info(fmt.Sprintf("Response http statuscode=%d\n", http.StatusOK))

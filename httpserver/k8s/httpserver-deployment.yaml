@@ -48,6 +48,11 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 5
           timeoutSeconds: 1
+        lifecycle:
+          // 由preStop来执行优雅终止操作。
+          preStop:
+            exec:
+              command: [ "/bin/sh","-c","httpserver -s quit; while killall -0 httpserver; do sleep 1; done" ]
         env:
           ## 代码和配置分离，将需要的环境变量设置到configmap中
         - name: ENV_VERSION
