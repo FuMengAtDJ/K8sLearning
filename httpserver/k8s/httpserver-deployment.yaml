@@ -49,7 +49,7 @@ spec:
           periodSeconds: 5
           timeoutSeconds: 1
         lifecycle:
-          // 由preStop来执行优雅终止操作。
+          ## 由preStop来执行优雅终止操作。
           preStop:
             exec:
               command: [ "/bin/sh","-c","httpserver -s quit; while killall -0 httpserver; do sleep 1; done" ]
