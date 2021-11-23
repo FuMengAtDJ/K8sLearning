@@ -2,75 +2,59 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"io"
-	"log"
-	"net"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/golang/glog"
 )
 
 func main() {
-	// 设置flag for glog
+	// 设置日志等级
 	flag.Set("v", "4")
 	flag.Set("alsologtostderr", "true")
-	// 默认log出力到/var/log/container下面。便于对log进行统一收集。不再单出力到下面的目录
+	// 默认log出力到/var/log/container下面。便于对log进行统一收集。不再单独出力到下面的目录
 	// flag.Set("log_dir", "./log")
+	// 解析传入的参数
 	flag.Parse()
+	// 退出前执行，清空缓存区，将日志写入文件
 	defer glog.Flush()
 
+	// 设置日志文件大小，超出时分割出新的文件,默认时1.8GB。
+	glog.MaxSize = 10 * 1024 * 1024 // 10MB
 	glog.V(2).Info("Starting http server...")
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("/", rootHandler)
 	serveMux.HandleFunc("/healthz", healthz)
 	err := http.ListenAndServe(":80", serveMux)
 	if err != nil {
-		log.Fatal(err)
+		glog.Fatal(err)
 	}
 
 }
 
 func healthz(w http.ResponseWriter, r *http.Request) {
-	glog.V(2).Info("health handler")
-	io.WriteString(w, "200")
+	// 下面的日志会因为探活的周期时间设置每5秒出力一次，不出力到log文件。
+	glog.V(5).Info("entering health handler, active= OK")
+	w.Write([]byte("200"))
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("entering root handler")
-	io.WriteString(w, "===================Details of the http request header:============\n")
+	glog.V(2).Info("entering root handler")
+	// add request header to response header.
 	for k, v := range r.Header {
-		io.WriteString(w, fmt.Sprintf("%s=%s\n", k, v))
 		w.Header()[k] = v
 	}
 
+	// add env to esponse header
 	version := os.Getenv("ENV_VERSION")
 	if version != "" {
-		io.WriteString(w, fmt.Sprintf("VERSION=%s\n", version))
 		w.Header().Set("VERSION", version)
 	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Hello, Welcome to kubernetes."))
 
-	glog.V(2).Info(fmt.Sprintf("Client Ip=%s\n", RemoteIp(r)))
-	glog.V(2).Info(fmt.Sprintf("Response http statuscode=%d\n", http.StatusOK))
-}
-
-func RemoteIp(req *http.Request) string {
-	remoteAddr := req.RemoteAddr
-	if ip := req.Header.Get("XRealIP"); ip != "" {
-		remoteAddr = ip
-	} else if ip = req.Header.Get("XForwardedFor"); ip != "" {
-		remoteAddr = ip
-	} else {
-		remoteAddr, _, _ = net.SplitHostPort(remoteAddr)
-	}
-
-	if remoteAddr == "::1" {
-		remoteAddr = "127.0.0.1"
-	}
-
-	return remoteAddr
+	reqTime := time.Now().Format("2006-01-02 15:04:05")
+	glog.V(2).Infof("[time: %s]-host: %s-method: %s-code: %d", reqTime, r.RemoteAddr, r.Method, http.StatusOK)
 }
