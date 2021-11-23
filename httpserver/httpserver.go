@@ -53,7 +53,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Hello, Welcome to kubernetes.¥n"))
+	w.Write([]byte("Hello, Welcome to kubernetes."))
 
 	reqTime := time.Now().Format("2006-01-02 15:04:05")
 	glog.V(2).Infof("[time: %s]-host: %s-method: %s-code: %d", reqTime, r.RemoteAddr, r.Method, http.StatusOK)
