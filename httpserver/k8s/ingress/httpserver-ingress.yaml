@@ -4,6 +4,7 @@ metadata:
   name: gateway
   annotations:
     kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   tls:
     - hosts:
@@ -13,7 +14,7 @@ spec:
     - host: hellok8s.com
       http:
         paths:
-          - path: "/"
+          - path: /(bar|healthz)
             pathType: Prefix
             backend:
               service:

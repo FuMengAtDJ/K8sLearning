@@ -24,7 +24,7 @@ func main() {
 	glog.MaxSize = 10 * 1024 * 1024 // 10MB
 	glog.V(2).Info("Starting http server...")
 	serveMux := http.NewServeMux()
-	serveMux.HandleFunc("/", rootHandler)
+	serveMux.HandleFunc("/bar", rootHandler)
 	serveMux.HandleFunc("/healthz", healthz)
 	err := http.ListenAndServe(":80", serveMux)
 	if err != nil {

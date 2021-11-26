@@ -1,4 +1,4 @@
-export tag=v1.5
+export tag=v1.6
 root:
 	export ROOT=github.com/FuMengAtDJ/K8sLearning
 
