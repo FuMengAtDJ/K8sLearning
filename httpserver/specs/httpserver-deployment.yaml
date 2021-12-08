@@ -16,13 +16,18 @@ spec:
     type: RollingUpdate
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
       labels:
         app: httpserver
     spec:
       containers:
       - name: httpserver
-        image: docker.io/mengfu521/httpserver:v1.7
+        image: docker.io/mengfu521/httpserver:v1.7-metrics
         imagePullPolicy: Always
+        ports:
+          - containerPort: 80
         resources:
           limits:
             cpu: "300m"

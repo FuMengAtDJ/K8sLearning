@@ -1,4 +1,4 @@
-export tag=v1.7
+export tag=v1.7-metrics
 root:
 	export ROOT=github.com/FuMengAtDJ/K8sLearning
 
