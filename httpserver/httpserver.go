@@ -1,12 +1,20 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"fmt"
+	"httpserver/metrics"
+	"io"
+	"math/rand"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/golang/glog"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -22,14 +30,40 @@ func main() {
 
 	// 设置日志文件大小，超出时分割出新的文件,默认时1.8GB。
 	glog.MaxSize = 10 * 1024 * 1024 // 10MB
-	glog.V(2).Info("Starting http server...")
+	glog.V(2).Info("Starting httpserver...")
+	metrics.Register()
+
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("/bar", rootHandler)
 	serveMux.HandleFunc("/healthz", healthz)
-	err := http.ListenAndServe(":80", serveMux)
-	if err != nil {
-		glog.Fatal(err)
+	serveMux.Handle("/metrics", promhttp.Handler())
+
+	srv := http.Server{
+		Addr:    ":80",
+		Handler: serveMux,
 	}
+
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			glog.Fatalf("listen: %s\n", err)
+		}
+	}()
+	glog.V(2).Info("htteserver Started")
+
+	<-done
+	glog.V(2).Info("httpserver Stopped")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer func() {
+		cancel()
+	}()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		glog.Fatalf("httpserver Shutdown Failed:%+v", err)
+	}
+	glog.V(2).Info("httpserver Exited Gracefully")
 
 }
 
@@ -41,6 +75,18 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	glog.V(2).Info("entering root handler")
+
+	timer := metrics.NewTimer()
+	defer timer.ObserveTotal()
+	user := r.URL.Query().Get("user")
+	delay := randInt(10, 2000)
+	time.Sleep(time.Millisecond * time.Duration(delay))
+	if user != "" {
+		io.WriteString(w, fmt.Sprintf("hello [%s]\n", user))
+	} else {
+		io.WriteString(w, "hello [stranger]\n")
+	}
+
 	// add request header to response header.
 	for k, v := range r.Header {
 		w.Header()[k] = v
@@ -57,4 +103,9 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 	reqTime := time.Now().Format("2006-01-02 15:04:05")
 	glog.V(2).Infof("[time: %s]-host: %s-method: %s-code: %d", reqTime, r.RemoteAddr, r.Method, http.StatusOK)
+}
+
+func randInt(min int, max int) int {
+	rand.Seed(time.Now().UTC().UnixNano())
+	return min + rand.Intn(max-min)
 }
