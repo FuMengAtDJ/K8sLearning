@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name:  simple
+  name:  httpserver
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: simple
+      app: httpserver
   strategy:
     rollingUpdate:
       ## 超过Pod数
@@ -20,10 +20,10 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "80"
       labels:
-        app: simple
+        app: httpserver
     spec:
       containers:
-      - name: simple
+      - name: httpserver
         image: docker.io/mengfu521/httpserver:v1.7-metrics
         imagePullPolicy: Always
         ports:
@@ -76,7 +76,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: simple
+  name: httpserver
 spec:
   type: ClusterIP
   ports:
@@ -84,4 +84,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: simple
+    app: httpserver
