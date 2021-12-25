@@ -9,7 +9,12 @@ spec:
     - simple.cncamp.io
   http:
     - match:
-        - port: 80
+      - uri:
+        exact: "/simple/bar"
+      rewrite:
+        uri: "/bar"
+    # - match:
+    #     - port: 80
       route:
         - destination:
             host: simple.simple.svc.cluster.local
