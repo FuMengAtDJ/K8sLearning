@@ -14,6 +14,8 @@ spec:
           exact: "/hello/bar"
       rewrite:
         uri: "/bar"
+    - match:
+      - port: 443
       - uri:
           exact: "/hello/healthz"
       rewrite:
