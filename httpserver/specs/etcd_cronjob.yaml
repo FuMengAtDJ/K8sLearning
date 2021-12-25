@@ -1,0 +1,57 @@
+apiVersion: batch/v2alpha1
+kind: CronJob
+metadata:
+  name: etcd-backup
+spec:
+ # 30分钟执行一次备份
+ schedule: "*/30 * * * *"
+ jobTemplate:
+  spec:
+    template:
+      metadata:
+       labels:
+        app: etcd-disaster-recovery
+      spec:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                  - matchExpressions:
+                    - key: kubernetes.io/role
+                      operator: In
+                      values:
+                      - master
+        containers:
+        - name: etcd
+          image: etcd:backup
+          command:
+          - sh
+          - -c
+          - "export ETCDCTL_API=3; \
+             # 备份前执行下清理的操作，最多保留6个快照
+             sh -x /usr/bin/delete_image_reserver_5.sh; \
+             etcdctl --endpoints $ENDPOINT snapshot save /snapshot/$(date +%Y%m%d_%H%M%S)_snapshot.db; \
+             echo etcd backup sucess"
+          env:
+          - name: ENDPOINT
+            value: "127.0.0.1:2379"
+          volumeMounts:
+            - mountPath: "/snapshot"
+              name: snapshot
+              subPath: etcd-snapshot
+            - mountPath: /etc/localtime
+              name: lt-config
+            - mountPath: /etc/timezone
+              name: tz-config
+        restartPolicy: OnFailure
+        volumes:
+          - name: snapshot
+            hostPath:
+              path: /var
+          - name: lt-config
+            hostPath:
+              path: /etc/localtime
+          - name: tz-config
+            hostPath:
+              path: /etc/timezone
+        hostNetwork: true
