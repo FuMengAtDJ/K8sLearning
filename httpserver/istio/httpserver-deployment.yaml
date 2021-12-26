@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  httpserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpserver
+  strategy:
+    rollingUpdate:
+      ## 超过Pod数
+      maxSurge: 1
+      ## 不足Pod数
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+      labels:
+        app: httpserver
+    spec:
+      containers:
+      - name: httpserver
+        image: docker.io/mengfu521/httpserver:v1.7-metrics
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 80
+        resources:
+          limits:
+            cpu: "100m"
+            memory: "100Mi"
+          requests:
+            cpu: "50m"
+            memory: "50Mi"
+        livenessProbe:
+          ## 探活，当检查失败时，该容器无法正常提供服务，
+          ## kubelet会终止该容器，安好RestartPolicy进行重启
+          httpGet:
+            path: /healthz
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 1
+        readinessProbe:
+          ## 就绪状态检查，当检查失败，意味着应用程序正在运行，但因为某些原因无法提供服务
+          ## Pod壮体啊会被标记为NotReady
+          httpGet:
+            path: /healthz
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 1
+        lifecycle:
+          ## 由preStop来执行优雅终止操作。
+          preStop:
+            exec:
+              command: [ "/bin/sh","-c","httpserver -s quit; while killall -0 httpserver; do sleep 1; done" ]
+        env:
+          ## 代码和配置分离，将需要的环境变量设置到configmap中
+        - name: ENV_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: httpserver-env-config
+              key: ENV_VERSION
+        volumeMounts:
+        - mountPath: /log
+          name: data
+      volumes:
+      - name: data
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpserver
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: httpserver
