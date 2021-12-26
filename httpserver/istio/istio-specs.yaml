@@ -16,7 +16,7 @@ spec:
         uri: "/bar"
       route:
         - destination:
-            host: httpsserver.securesvc.svc.cluster.local
+            host: httpserver.securesvc.svc.cluster.local
             port:
               number: 80
     - match:
@@ -27,7 +27,7 @@ spec:
         uri: "/healthz"
       route:
         - destination:
-            host: httpsserver.securesvc.svc.cluster.local
+            host: httpserver.securesvc.svc.cluster.local
             port:
               number: 80
 ---
