@@ -3,6 +3,8 @@ kind: VirtualService
 metadata:
   name: httpsserver
 spec:
+  gateways:
+    - httpsserver
   hosts:
     - httpsserver.cncamp.io
   http:
@@ -17,30 +19,46 @@ spec:
         uri: "/bar"
       route:
         - destination:
-            host: httpsserver
+            host: httpsserver-rule
             subset: v2
             port:
               number: 80
     - route:
       - destination:
-          host: httpsserver
+          host: httpsserver-rule
           subset: v1
           port:
             number: 80
 
 ---
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
 metadata:
   name: httpsserver
 spec:
-  host: httpserver.securesvc.svc.cluster.local
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - httpsserver.cncamp.io
+      port:
+        name: http-default
+        number: 443
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: cncamp-credential
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: httpsserver-rule
+spec:
+  host: httpserver
   trafficPolicy:
     loadBalancer:
       simple: RANDOM
-    tls:
-      mode: SIMPLE
-      credentialName: cncamp-credential
   subsets:
     - name: v1
       labels:
