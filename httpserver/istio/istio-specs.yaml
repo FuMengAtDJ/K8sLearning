@@ -19,13 +19,13 @@ spec:
         uri: "/bar"
       route:
         - destination:
-            host: httpsserver
+            host: httpserver.securesvc.svc.cluster.local
             subset: v2
             port:
               number: 80
     - route:
       - destination:
-          host: httpsserver
+          host: httpserver.securesvc.svc.cluster.local
           subset: v1
           port:
             number: 80
@@ -55,7 +55,7 @@ kind: DestinationRule
 metadata:
   name: httpsserver-rule
 spec:
-  host: httpserver
+  host: httpserver.securesvc.svc.cluster.local
   trafficPolicy:
     loadBalancer:
       simple: RANDOM
