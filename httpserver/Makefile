@@ -1,4 +1,4 @@
-export tag=v1.7-metrics
+export tag=v2.0-istio
 root:
 	export ROOT=github.com/FuMengAtDJ/K8sLearning
 

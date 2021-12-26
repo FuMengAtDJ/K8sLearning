@@ -10,6 +10,9 @@ spec:
   http:
     - match:
       - port: 443
+      - headers:
+            user:
+              exact: jesse
       - uri:
           exact: "/hello/bar"
       rewrite:
@@ -17,10 +20,14 @@ spec:
       route:
         - destination:
             host: httpserver.securesvc.svc.cluster.local
+            subset: v2
             port:
               number: 80
     - match:
       - port: 443
+      - headers:
+            user:
+              exact: jesse
       - uri:
           exact: "/hello/healthz"
       rewrite:
@@ -28,23 +35,36 @@ spec:
       route:
         - destination:
             host: httpserver.securesvc.svc.cluster.local
+            subset: v2
             port:
               number: 80
+    - route:
+      - destination:
+          host: httpserver.securesvc.svc.cluster.local
+          subset: v1
+          port:
+            number: 80
+
 ---
-apiVersion: networking.istio.io/v1beta1
-kind: Gateway
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
 metadata:
   name: httpsserver
 spec:
-  selector:
-    istio: ingressgateway
-  servers:
-    - hosts:
-        - httpsserver.cncamp.io
-      port:
-        name: http-default
-        number: 443
-        protocol: HTTPS
-      tls:
-        mode: SIMPLE
-        credentialName: cncamp-credential
+  host: httpserver.securesvc.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM
+    tls:
+      mode: SIMPLE
+      credentialName: cncamp-credential
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2
+      trafficPolicy:
+        loadBalancer:
+          simple: ROUND_ROBIN
