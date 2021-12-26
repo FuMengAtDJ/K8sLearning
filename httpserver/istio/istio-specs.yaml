@@ -19,17 +19,6 @@ spec:
             host: httpserver.securesvc.svc.cluster.local
             port:
               number: 80
-    - match:
-      - port: 443
-      - uri:
-          exact: "/hello/healthz"
-      rewrite:
-        uri: "/healthz"
-      route:
-        - destination:
-            host: httpserver.securesvc.svc.cluster.local
-            port:
-              number: 80
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
