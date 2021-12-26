@@ -19,10 +19,6 @@ spec:
             host: httpserver.securesvc.svc.cluster.local
             port:
               number: 80
-      timeout: 1s
-      retries:
-        attempts: 3
-        perTryTimeout: 2s    
     - match:
       - port: 443
       - uri:
