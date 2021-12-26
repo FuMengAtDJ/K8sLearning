@@ -4,7 +4,7 @@ metadata:
   name: httpsserver
 spec:
   hosts:
-    - httpsserver
+    - httpsserver.cncamp.io
   http:
     - match:
       - port: 443
