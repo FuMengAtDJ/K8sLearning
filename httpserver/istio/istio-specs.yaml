@@ -3,10 +3,8 @@ kind: VirtualService
 metadata:
   name: httpsserver
 spec:
-  gateways:
-    - httpsserver
   hosts:
-    - httpsserver.cncamp.io
+    - httpsserver
   http:
     - match:
       - port: 443
@@ -19,28 +17,13 @@ spec:
         uri: "/bar"
       route:
         - destination:
-            host: httpserver.securesvc.svc.cluster.local
-            subset: v2
-            port:
-              number: 80
-    - match:
-      - port: 443
-      - headers:
-            user:
-              exact: jesse
-      - uri:
-          exact: "/hello/healthz"
-      rewrite:
-        uri: "/healthz"
-      route:
-        - destination:
-            host: httpserver.securesvc.svc.cluster.local
+            host: httpsserver
             subset: v2
             port:
               number: 80
     - route:
       - destination:
-          host: httpserver.securesvc.svc.cluster.local
+          host: httpsserver
           subset: v1
           port:
             number: 80
