@@ -19,13 +19,13 @@ spec:
         uri: "/bar"
       route:
         - destination:
-            host: httpsserver-rule
+            host: httpsserver
             subset: v2
             port:
               number: 80
     - route:
       - destination:
-          host: httpsserver-rule
+          host: httpsserver
           subset: v1
           port:
             number: 80
